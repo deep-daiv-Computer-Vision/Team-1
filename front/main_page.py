@@ -126,11 +126,17 @@ def render_main_page():
             st.markdown(intro)
             st.session_state.messages.append({"role": "assistant", "content": intro})  # 대화 기록에 추가
         st.session_state.greetings = True  # 상태 업데이트
-
+        st.rerun()
+        
     # 상태 관리: 버튼이 눌리지 않았을 때
     if "button_pressed" not in st.session_state:
         st.session_state.button_pressed = None
         st.session_state.system_prompt = None
+    # 대화 메시지 출력
+    # st.subheader("Conversation")
+    for message in st.session_state["messages"]:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
 
     # 버튼이 눌리지 않았을 때 알고리즘 버튼 출력
     if st.session_state.button_pressed is None:
@@ -160,12 +166,7 @@ def render_main_page():
             st.session_state.button_pressed = None  # 상태 초기화
             st.session_state.system_prompt = None
             st.rerun()  # 리프레시하여 다시 처음 상태로 돌아가기
-    # 대화 메시지 출력
-    # st.subheader("Conversation")
-    for message in st.session_state["messages"]:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
-
+    
     # 프롬프트 입력 창 (st.chat_input() 사용)
     user_input = st.chat_input("Your prompt:")
     if user_input:  # 사용자가 입력을 하면
