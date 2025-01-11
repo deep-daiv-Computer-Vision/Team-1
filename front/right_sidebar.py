@@ -11,6 +11,7 @@ from umap import UMAP
 import plotly.express as px
 from sentence_transformers import SentenceTransformer
 from streamlit_plotly_events import plotly_events
+import plotly.graph_objects as go
 
 
 def render_right_sidebar():
@@ -139,16 +140,46 @@ def render_right_sidebar():
     # 선택한 카테고리 필터링
     filtered_df = df[df['Category'].isin(selected_categories)]
 
-    # Plotly 시각화
-    fig = px.scatter(
-        filtered_df,
-        x='UMAP_1',
-        y='UMAP_2',
-        color='Category',
-        text='Word',
-        labels={'UMAP_1': 'Dimension 1', 'UMAP_2': 'Dimension 2'},
-        hover_data=['Word']  # Hover 시 단어 표시
+    fig = go.Figure()
+
+    fig.add_trace(go.Scatter(
+        x=df['UMAP_1'],
+        y=df['UMAP_2'],
+        mode='markers',
+        hovertemplate='<b>%{text}</b><extra></extra>',  # Show only the word in hover text
+    marker=dict(size=10, color='blue')
+    
+    ))
+
+    fig.update_layout(
+    title='Word Embeddings Visualization',
+    xaxis_title='X',
+    yaxis_title='Y',
+    height=500,
+    clickmode='event+select',
+    legend=dict(
+            orientation="h",  # 수평으로 정렬
+            yanchor="bottom",
+            y=-0.2,  # 그래프 아래로 이동
+            xanchor="center",
+            x=0.5
+        )
     )
+
+    # 그래프 축 숨기기
+    fig.update_xaxes(visible=False)  # x축 숨김
+    fig.update_yaxes(visible=False)  # y축 숨김
+
+    # # Plotly 시각화
+    # fig = px.scatter(
+    #     filtered_df,
+    #     x='UMAP_1',
+    #     y='UMAP_2',
+    #     color='Category',
+    #     text='Word',
+    #     labels={'UMAP_1': 'Dimension 1', 'UMAP_2': 'Dimension 2'},
+    #     hover_data=['Word']  # Hover 시 단어 표시
+    # )
 
     # streamlit_plotly_events로 클릭 이벤트 감지
     clicked_points = plotly_events(fig, click_event=True, hover_event=False)
