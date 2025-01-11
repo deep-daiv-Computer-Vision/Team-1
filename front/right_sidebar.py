@@ -1,10 +1,16 @@
+# import streamlit as st
+# import pandas as pd
+# import numpy as np
+# from sklearn.feature_extraction.text import TfidfVectorizer
+# from umap import UMAP
+# import plotly.express as px
+# from sentence_transformers import SentenceTransformer
 import streamlit as st
 import pandas as pd
-import numpy as np
-from sklearn.feature_extraction.text import TfidfVectorizer
 from umap import UMAP
 import plotly.express as px
 from sentence_transformers import SentenceTransformer
+from streamlit_plotly_events import plotly_events
 
 
 def render_right_sidebar():
@@ -57,6 +63,51 @@ def render_right_sidebar():
         "최적경로탐색", "그래프경로", "최단경로패턴", "최단경로시간", "최단경로설계"
     ]
 
+    # model = SentenceTransformer('jhgan/ko-sroberta-multitask')
+
+    # # 모든 단어와 카테고리 데이터프레임 생성
+    # categories = ['DFS'] * len(dfs_words) + ['BFS'] * len(bfs_words) + ['Sort'] * len(sort_words) + \
+    #              ['Greedy'] * len(greedy_words) + ['DP'] * len(dp_words) + ['Shortest Path'] * len(shortest_path_words)
+
+    # words = dfs_words + bfs_words + sort_words + greedy_words + dp_words + shortest_path_words
+    # df = pd.DataFrame({'Word': words, 'Category': categories})
+
+    # # 텍스트 임베딩 (Sentence Transformer)
+    # embeddings = model.encode(df['Word'].tolist(), show_progress_bar=True)
+    
+    # # 차원 축소 (UMAP)
+    # umap_model = UMAP(n_neighbors=15, min_dist=0.1, metric='cosine')
+    # embedding = umap_model.fit_transform(embeddings)
+
+    # # 결과를 데이터프레임에 저장
+    # df['UMAP_1'] = embedding[:, 0]
+    # df['UMAP_2'] = embedding[:, 1]
+
+    # # Streamlit 사이드바 및 UI
+    # st.header("Algorithm Word Categories")
+    # selected_categories = st.multiselect(
+    #     "Select categories to display:",
+    #     options=df['Category'].unique(),
+    #     default=df['Category'].unique()
+    # )
+
+    # # 선택한 카테고리 필터링
+    # filtered_df = df[df['Category'].isin(selected_categories)]
+
+    # # Plotly 시각화
+    # fig = px.scatter(
+    #     filtered_df,
+    #     x='UMAP_1',
+    #     y='UMAP_2',
+    #     color='Category',
+    #     text='Word',
+    #     # title="Algorithm Word Embedding Visualization",
+    #     labels={'UMAP_1': 'Dimension 1', 'UMAP_2': 'Dimension 2'},
+    #     hover_data=['Word']
+    # )
+
+    # st.plotly_chart(fig, use_container_width=True)
+    # Sentence Transformer 모델 로드
     model = SentenceTransformer('jhgan/ko-sroberta-multitask')
 
     # 모든 단어와 카테고리 데이터프레임 생성
@@ -68,7 +119,7 @@ def render_right_sidebar():
 
     # 텍스트 임베딩 (Sentence Transformer)
     embeddings = model.encode(df['Word'].tolist(), show_progress_bar=True)
-    
+
     # 차원 축소 (UMAP)
     umap_model = UMAP(n_neighbors=15, min_dist=0.1, metric='cosine')
     embedding = umap_model.fit_transform(embeddings)
@@ -95,9 +146,15 @@ def render_right_sidebar():
         y='UMAP_2',
         color='Category',
         text='Word',
-        title="Algorithm Word Embedding Visualization",
         labels={'UMAP_1': 'Dimension 1', 'UMAP_2': 'Dimension 2'},
-        hover_data=['Word']
+        hover_data=['Word']  # Hover 시 단어 표시
     )
 
-    st.plotly_chart(fig, use_container_width=True)
+    # streamlit_plotly_events로 클릭 이벤트 감지
+    clicked_points = plotly_events(fig, click_event=True, hover_event=False)
+
+    # 클릭된 점의 정보 출력
+    if clicked_points:
+        clicked_index = clicked_points[0]['pointIndex']  # 클릭된 점의 인덱스 가져오기
+        clicked_word = filtered_df.iloc[clicked_index]['Word']  # 클릭된 점의 단어 가져오기
+        st.write(f"### You clicked on the word: **{clicked_word}**")
