@@ -12,6 +12,7 @@ import plotly.express as px
 from sentence_transformers import SentenceTransformer
 from streamlit_plotly_events import plotly_events
 import plotly.graph_objects as go
+from plotly.graph_objs import Scatter, Figure, Layout  
 
 
 def render_right_sidebar():
@@ -64,57 +65,12 @@ def render_right_sidebar():
         "최적경로탐색", "그래프경로", "최단경로패턴", "최단경로시간", "최단경로설계"
     ]
 
-    # model = SentenceTransformer('jhgan/ko-sroberta-multitask')
-
-    # # 모든 단어와 카테고리 데이터프레임 생성
-    # categories = ['DFS'] * len(dfs_words) + ['BFS'] * len(bfs_words) + ['Sort'] * len(sort_words) + \
-    #              ['Greedy'] * len(greedy_words) + ['DP'] * len(dp_words) + ['Shortest Path'] * len(shortest_path_words)
-
-    # words = dfs_words + bfs_words + sort_words + greedy_words + dp_words + shortest_path_words
-    # df = pd.DataFrame({'Word': words, 'Category': categories})
-
-    # # 텍스트 임베딩 (Sentence Transformer)
-    # embeddings = model.encode(df['Word'].tolist(), show_progress_bar=True)
-    
-    # # 차원 축소 (UMAP)
-    # umap_model = UMAP(n_neighbors=15, min_dist=0.1, metric='cosine')
-    # embedding = umap_model.fit_transform(embeddings)
-
-    # # 결과를 데이터프레임에 저장
-    # df['UMAP_1'] = embedding[:, 0]
-    # df['UMAP_2'] = embedding[:, 1]
-
-    # # Streamlit 사이드바 및 UI
-    # st.header("Algorithm Word Categories")
-    # selected_categories = st.multiselect(
-    #     "Select categories to display:",
-    #     options=df['Category'].unique(),
-    #     default=df['Category'].unique()
-    # )
-
-    # # 선택한 카테고리 필터링
-    # filtered_df = df[df['Category'].isin(selected_categories)]
-
-    # # Plotly 시각화
-    # fig = px.scatter(
-    #     filtered_df,
-    #     x='UMAP_1',
-    #     y='UMAP_2',
-    #     color='Category',
-    #     text='Word',
-    #     # title="Algorithm Word Embedding Visualization",
-    #     labels={'UMAP_1': 'Dimension 1', 'UMAP_2': 'Dimension 2'},
-    #     hover_data=['Word']
-    # )
-
-    # st.plotly_chart(fig, use_container_width=True)
     # Sentence Transformer 모델 로드
     model = SentenceTransformer('jhgan/ko-sroberta-multitask')
 
     # 모든 단어와 카테고리 데이터프레임 생성
     categories = ['DFS'] * len(dfs_words) + ['BFS'] * len(bfs_words) + ['Sort'] * len(sort_words) + \
                  ['Greedy'] * len(greedy_words) + ['DP'] * len(dp_words) + ['Shortest Path'] * len(shortest_path_words)
-
     words = dfs_words + bfs_words + sort_words + greedy_words + dp_words + shortest_path_words
     df = pd.DataFrame({'Word': words, 'Category': categories})
 
@@ -140,52 +96,77 @@ def render_right_sidebar():
     # 선택한 카테고리 필터링
     filtered_df = df[df['Category'].isin(selected_categories)]
 
-    fig = go.Figure()
+    # Plotly 시각화를 위한 데이터 생성
+    fig = Figure()
 
-    fig.add_trace(go.Scatter(
-        x=df['UMAP_1'],
-        y=df['UMAP_2'],
-        mode='markers',
-        hovertemplate='<b>%{text}</b><extra></extra>',  # Show only the word in hover text
-    marker=dict(size=10, color='blue')
-    
-    ))
+    # 카테고리별로 데이터 추가
+    category_colors = {
+        "DFS": "blue",
+        "BFS": "red",
+        "Sort": "green",
+        "Greedy": "purple",
+        "DP": "orange",
+        "Shortest Path": "brown"
+    }
 
+    for category in filtered_df['Category'].unique():
+        category_df = filtered_df[filtered_df['Category'] == category]
+        fig.add_trace(Scatter(
+            x=category_df['UMAP_1'],
+            y=category_df['UMAP_2'],
+            mode='markers',
+            marker=dict(size=8, color=category_colors[category]), opacity=0.5,
+            name=category,  # 범례에 표시
+            text=category_df['Word'],  # Hover 시 단어 표시
+            hovertemplate='<b>%{text}</b><extra></extra>'
+        ))
+
+    # 그래프 레이아웃 설정
     fig.update_layout(
-    title='Word Embeddings Visualization',
-    xaxis_title='X',
-    yaxis_title='Y',
-    height=500,
-    clickmode='event+select',
-    legend=dict(
+        title=None,  # 제목 제거
+        xaxis_title=None,
+        yaxis_title=None,
+        height=450,
+        width=500,
+        clickmode='event+select',
+        legend=dict(
             orientation="h",  # 수평으로 정렬
             yanchor="bottom",
-            y=-0.2,  # 그래프 아래로 이동
+            y=-0.3,  # 그래프 아래로 이동
             xanchor="center",
             x=0.5
         )
     )
 
     # 그래프 축 숨기기
-    fig.update_xaxes(visible=False)  # x축 숨김
-    fig.update_yaxes(visible=False)  # y축 숨김
-
-    # # Plotly 시각화
-    # fig = px.scatter(
-    #     filtered_df,
-    #     x='UMAP_1',
-    #     y='UMAP_2',
-    #     color='Category',
-    #     text='Word',
-    #     labels={'UMAP_1': 'Dimension 1', 'UMAP_2': 'Dimension 2'},
-    #     hover_data=['Word']  # Hover 시 단어 표시
-    # )
+    fig.update_xaxes(visible=False)
+    fig.update_yaxes(visible=False)
+    # Streamlit CSS 스타일로 왼쪽 정렬
+    st.markdown(
+        """
+        <style>
+        .plot-container {
+            display: flex;
+            justify-content: flex-start; /* 왼쪽 정렬 */
+            margin-left: 10px;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
     # streamlit_plotly_events로 클릭 이벤트 감지
     clicked_points = plotly_events(fig, click_event=True, hover_event=False)
 
-    # 클릭된 점의 정보 출력
-    if clicked_points:
-        clicked_index = clicked_points[0]['pointIndex']  # 클릭된 점의 인덱스 가져오기
-        clicked_word = filtered_df.iloc[clicked_index]['Word']  # 클릭된 점의 단어 가져오기
-        st.write(f"### You clicked on the word: **{clicked_word}**")
+    # Plotly 그래프 표시 (왼쪽 정렬)
+    st.markdown('<div class="plot-container">', unsafe_allow_html=True)
+    # st.plotly_chart(fig, use_container_width=False)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # streamlit_plotly_events로 클릭 이벤트 감지
+    # clicked_points = plotly_events(fig, click_event=True, hover_event=False)
+
+    # Plotly 그래프 표시
+    # st.plotly_chart(fig, use_container_width=True)
+
+    
