@@ -34,7 +34,7 @@ render_sidebar()
 
 # 중앙 메인 페이지
 with col2:
-    st.title("Prompt Explainer")
+    st.title("Prompt Explainer 🖍️")
     render_main_page()
 
 # 오른쪽 사이드바

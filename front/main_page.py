@@ -151,7 +151,7 @@ def render_main_page():
 
     # 버튼이 눌린 후 선택된 알고리즘의 프롬프트 표시
     else:
-        st.sidebar.title("System Prompt")
+        st.sidebar.title("🛠️ System Prompt")
         st.sidebar.info(st.session_state.system_prompt)  # 사이드바에 시스템 프롬프트 표시
 
         # 선택된 알고리즘의 상태에서 "다시 선택" 버튼을 만들어 상태 초기화
@@ -168,7 +168,7 @@ def render_main_page():
             st.rerun()  # 리프레시하여 다시 처음 상태로 돌아가기
     
     # 프롬프트 입력 창 (st.chat_input() 사용)
-    user_input = st.chat_input("Your prompt:")
+    user_input = st.chat_input("프롬프트를 입력하세요!")
     if user_input:  # 사용자가 입력을 하면
         if user_input.strip():
             # LLM 응답 생성

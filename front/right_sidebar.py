@@ -168,6 +168,8 @@ from umap import UMAP
 from sentence_transformers import SentenceTransformer
 from streamlit_plotly_events import plotly_events
 from plotly.graph_objs import Scatter, Figure
+# from plotly.colors import DEFAULT_PLOTLY_COLORS
+from plotly.colors import qualitative
 
 
 # 텍스트 임베딩 함수 (캐싱 적용)
@@ -237,9 +239,9 @@ def render_right_sidebar():
     df['UMAP_2'] = embedding[:, 1]
 
     # Streamlit UI
-    st.header("Algorithm Word Categories")
+    st.subheader("🪄 알고리즘별 단어 추천")
     selected_categories = st.multiselect(
-        "Select categories to display:",
+        "관심있는 알고리즘을 선택하세요!",
         options=df['Category'].unique(),
         default=df['Category'].unique()
     )
@@ -247,12 +249,17 @@ def render_right_sidebar():
     # 선택한 카테고리 필터링
     filtered_df = df[df['Category'].isin(selected_categories)]
 
+    # 기본 색상 팔레트를 이용한 카테고리별 색상 매핑
+    # category_colors = {cat: color for cat, color in zip(categories, DEFAULT_PLOTLY_COLORS)}
+    # 카테고리별로 색상을 매핑 (Set1 팔레트 사용)
+    category_colors = {cat: color for cat, color in zip(categories, qualitative.Dark2)}
+
     # Plotly 시각화를 위한 데이터 생성
     fig = Figure()
-    category_colors = {
-        "DFS": "blue", "BFS": "red", "Sort": "green", 
-        "Greedy": "purple", "DP": "orange", "Shortest Path": "brown"
-    }
+    # category_colors = {
+    #     "DFS": "aquamarine", "BFS": "tomato", "Sort": "lightgreen", 
+    #     "Greedy": "plum", "DP": "lightsalmon", "Shortest Path": "chocolate"
+    # }
 
     for category in filtered_df['Category'].unique():
         category_df = filtered_df[filtered_df['Category'] == category]
@@ -260,8 +267,9 @@ def render_right_sidebar():
             x=category_df['UMAP_1'],
             y=category_df['UMAP_2'],
             mode='markers',
-            marker=dict(size=8, color=category_colors[category]),
-            opacity=0.5,
+            # marker=dict(size=8, color=category_colors[category]),
+            marker=dict(color=category_colors[category], size=10),
+            # opacity=0.5,
             name=category,
             text=category_df['Word'],
             hovertemplate='<b>%{text}</b><extra></extra>'

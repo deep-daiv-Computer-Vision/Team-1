@@ -3,10 +3,10 @@ from back.chat_storage import save_chat_history, load_chat_history
 
 def render_sidebar():
     """왼쪽 사이드바 구현"""
-    st.sidebar.title("Conversations")
+    st.sidebar.title("💬 Conversations")
 
     # Make New Page 버튼
-    if st.sidebar.button("Make New Page"):
+    if st.sidebar.button("새로운 대화하기"):
         chat_history = load_chat_history()
         chat_history.append({"messages": []})  # 새 대화는 빈 메시지 리스트로 추가
         save_chat_history(chat_history)
@@ -25,5 +25,5 @@ def render_sidebar():
     # 왼쪽 사이드바에 현재 선택된 시스템 프롬프트 표시
     if "current_prompt" in st.session_state and st.session_state["current_prompt"]:
         # st.sidebar.subheader("System Prompt")
-        st.sidebar.title("System Prompt")
+        st.sidebar.title("🛠️ System Prompt")
         st.sidebar.info(st.session_state["current_prompt"])
