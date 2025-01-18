@@ -123,10 +123,10 @@ def render_main_page():
     if not st.session_state.greetings:
         with st.chat_message("assistant"):
             intro = """
-            Welcome to Prompt Explainer! 🤵🏻‍♀️\n
-            This tool is designed to help you leverage LLMs (Large Language Models) more effectively when solving algorithm problems. ⛳️\n
-            By visually highlighting which parts of the prompt the LLM focuses on, you can craft better prompts and receive higher-quality response codes. 🎲\n
-            When you input a prompt, we will visualize the emphasized sections based on SHAP values. This allows you to learn better prompt-writing strategies and maximize the utility of LLMs in your workflow. 🎞️\n 
+            Welcome to **Prompt Explainer**! 🤵🏻‍♀️\n
+            This tool is designed to help you leverage LLMs (Large Language Models) more effectively when **solving algorithm problems**. ⛳️\n
+            By visually highlighting which **parts of the prompt the LLM focuses on**, you can craft **better prompts** and receive **higher-quality response codes**. 🎲\n
+            When you input a prompt, we will visualize the emphasized sections based on **SHAP values**. This allows you to learn better **prompt-writing strategies** and **maximize the utility of LLMs** in your workflow. 🎞️\n 
             Give it a try and enhance your experience in solving algorithmic problems! 🎸
             """
             st.markdown(intro)
