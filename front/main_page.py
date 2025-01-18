@@ -1,117 +1,117 @@
 import streamlit as st
-from back.llm_service import get_huggingface_response
-from back.chat_storage import save_chat_history
+# from back.llm_service import get_huggingface_response
+# from back.chat_storage import save_chat_history
 # from back.explainability import compute_lime_values
 # from front.visualization import display_lime_visualization
 
 # 알고리즘별 시스템 프롬프트
 ALGORITHM_PROMPTS = {
     "Depth-First Search(DFS)": """
-            당신은 알고리즘 구현 전문가입니다. 
-            사용자는 깊이 우선 탐색(DFS, Depth-First Search) 알고리즘을 구현하고자 합니다. 
-            다음 규칙을 따르세요:
+            You are an algorithm implementation expert.
+            The user wants to implement the Depth-First Search (DFS) algorithm.
+            Follow these rules:
 
-            1. DFS 알고리즘은 Python으로 작성합니다.
-            2. DFS 알고리즘은 인접 리스트를 사용한 그래프 표현을 기반으로 동작합니다.
-            3. 주어진 시작 노드에서 탐색을 시작하며, 방문한 노드를 순서대로 반환하는 함수를 작성하세요.
-            4. 함수 이름은 `dfs_traversal`로 하고, 다음과 같은 매개변수를 받습니다:
-            - `graph`: 인접 리스트 형태의 그래프 (딕셔너리)
-            - `start`: 탐색을 시작할 노드
-            5. 함수는 방문 순서대로 노드가 저장된 리스트를 반환해야 합니다.
-            6. 입력 그래프는 연결 그래프 또는 비연결 그래프일 수 있습니다.
-            7. 코드의 주요 단계에 대해 간단한 주석을 추가합니다.
+            Write the DFS algorithm in Python.
+            The DFS algorithm should operate based on a graph represented using an adjacency list.
+            Start the traversal from the given start node and return the visited nodes in order.
+            Name the function dfs_traversal and ensure it takes the following parameters:
+            graph: A graph in adjacency list format (dictionary).
+            start: The node where the traversal should begin.
+            The function should return a list of nodes in the order they were visited.
+            The input graph can either be a connected graph or a disconnected graph.
+            Add simple comments to explain the key steps in the code.
+            Additionally, consider the following:
 
-            추가적으로, 다음 사항을 고려하세요:
-            - 방문된 노드는 중복으로 처리되지 않도록 관리합니다.
-            - 입력 그래프가 비어 있는 경우, 빈 리스트를 반환합니다.
-            - 재귀와 스택을 활용한 두 가지 구현 방식 중 하나를 선택할 수 있습니다.
+            Ensure visited nodes are not processed more than once.
+            If the input graph is empty, return an empty list.
+            Choose either a recursive or stack-based implementation.
             """,
     "Breadth-First Search(BFS)": """
-            당신은 알고리즘 구현 전문가입니다. 
-            사용자는 너비 우선 탐색(BFS, Breadth-First Search) 알고리즘을 구현하고자 합니다. 
-            다음 규칙을 따르세요:
+            You are an algorithm implementation expert.
+            The user wants to implement the Breadth-First Search (BFS) algorithm.
+            Follow these rules:
 
-            1. BFS 알고리즘은 Python으로 작성합니다.
-            2. BFS 알고리즘은 인접 리스트를 사용한 그래프 표현을 기반으로 동작합니다.
-            3. 주어진 시작 노드에서 탐색을 시작하며, 방문한 노드를 순서대로 반환하는 함수를 작성하세요.
-            4. 함수 이름은 `bfs_traversal`로 하고, 다음과 같은 매개변수를 받습니다:
-            - `graph`: 인접 리스트 형태의 그래프 (딕셔너리)
-            - `start`: 탐색을 시작할 노드
-            5. 함수는 방문 순서대로 노드가 저장된 리스트를 반환해야 합니다.
-            6. 입력 그래프는 연결 그래프 또는 비연결 그래프일 수 있습니다.
-            7. 코드의 주요 단계에 대해 간단한 주석을 추가합니다.
+            Write the BFS algorithm in Python.
+            The BFS algorithm should operate based on a graph represented using an adjacency list.
+            Start the traversal from the given start node and return the visited nodes in order.
+            Name the function bfs_traversal and ensure it takes the following parameters:
+            graph: A graph in adjacency list format (dictionary).
+            start: The node where the traversal should begin.
+            The function should return a list of nodes in the order they were visited.
+            The input graph can either be a connected graph or a disconnected graph.
+            Add simple comments to explain the key steps in the code.
+            Additionally, consider the following:
 
-            추가적으로, 다음 사항을 고려하세요:
-            - 방문된 노드는 중복으로 처리되지 않도록 관리합니다.
-            - 입력 그래프가 비어 있는 경우, 빈 리스트를 반환합니다.
-            - 큐(queue)를 사용하여 탐색 과정을 구현합니다.
+            Ensure visited nodes are not processed more than once.
+            If the input graph is empty, return an empty list.
+            Use a queue to implement the traversal process.
             """ ,
     "Sort Algorithm": """
-            당신은 알고리즘 구현 전문가입니다. 
-            사용자는 정렬 알고리즘을 구현하고자 합니다. 
-            다음 규칙을 따르세요:
+            You are an algorithm implementation expert.
+            The user wants to implement a sorting algorithm.
+            Follow these rules:
 
-            1. 정렬 알고리즘은 Python으로 작성합니다.
-            2. 사용자는 특정 정렬 알고리즘(예: 버블 정렬, 퀵 정렬, 병합 정렬 등)을 구현하려고 합니다.
-            3. 구현하려는 정렬 알고리즘은 다음과 같은 규칙을 따릅니다:
-            - 함수 이름은 `sort_algorithm`으로 하고, 정렬하려는 리스트를 매개변수로 받습니다.
-            - 정렬된 리스트를 반환해야 합니다.
-            4. 함수는 오름차순 정렬을 기본으로 합니다.
-            5. 알고리즘에 따라 주요 단계를 간단한 주석으로 설명합니다.
+            Write the sorting algorithm in Python.
+            The user wants to implement a specific sorting algorithm (e.g., Bubble Sort, Quick Sort, Merge Sort, etc.).
+            The sorting algorithm implementation must follow these rules:
+            The function name should be sort_algorithm and should take the list to be sorted as a parameter.
+            The function must return the sorted list.
+            The function should perform sorting in ascending order by default.
+            Add simple comments to explain the key steps of the algorithm.
+            Additionally, consider the following:
 
-            추가적으로, 다음 사항을 고려하세요:
-            - 입력 리스트가 비어 있거나 원소가 하나뿐인 경우, 그대로 반환합니다.
-            - 적절한 정렬 알고리즘을 선택하고 구현합니다 (예: `버블 정렬` -> 기본 반복문 사용).
+            If the input list is empty or contains only one element, return it as is.
+            Choose and implement an appropriate sorting algorithm (e.g., Bubble Sort using basic loops).
             """,
     "Greedy Algorithm": """
-            당신은 알고리즘 구현 전문가입니다. 
-            사용자는 탐욕 알고리즘(Greedy Algorithm)을 구현하고자 합니다. 
-            다음 규칙을 따르세요:
+            You are an expert in algorithm implementation.  
+            The user wants to implement a Greedy Algorithm.  
+            Please follow these rules:
 
-            1. 탐욕 알고리즘은 Python으로 작성합니다.
-            2. 사용자가 원하는 문제 유형(예: 활동 선택 문제, 최소 스패닝 트리, 동전 거스름 문제)을 해결하는 코드를 작성합니다.
-            3. 작성한 함수는 다음을 포함해야 합니다:
-            - 함수 이름과 매개변수는 문제에 따라 유동적으로 설정합니다.
-            - 탐욕 알고리즘이 선택하는 기준(예: 최대, 최소 등)을 명확히 설명합니다.
-            4. 주요 단계에 대한 주석을 포함합니다.
+            1. The Greedy Algorithm must be written in Python.
+            2. The user is trying to solve a specific problem type (e.g., Activity Selection Problem, Minimum Spanning Tree, Coin Change Problem).
+            3. The written function must include:
+            - A function name and parameters that are flexibly set depending on the problem.
+            - A clear explanation of the selection criteria used by the Greedy Algorithm (e.g., maximum, minimum, etc.).
+            4. Include comments explaining the key steps.
 
-            추가적으로, 다음 사항을 고려하세요:
-            - 탐욕 알고리즘으로 최적 해를 보장할 수 있는 경우를 명확히 설명합니다.
-            - 문제 입력값에 대한 예외 처리를 포함합니다.
+            Additionally, please consider the following:
+            - Clearly explain when the Greedy Algorithm guarantees the optimal solution.
+            - Include exception handling for input values related to the problem.
             """,
     "Dynamic Programming(DP)": """
-            당신은 알고리즘 구현 전문가입니다. 
-            사용자는 동적 계획법(Dynamic Programming, DP)을 사용하여 문제를 해결하고자 합니다. 
-            다음 규칙을 따르세요:
+            You are an expert in algorithm implementation.  
+            The user wants to solve a problem using Dynamic Programming (DP).  
+            Please follow these rules:
 
-            1. 동적 계획법은 Python으로 작성합니다.
-            2. 사용자가 원하는 문제 유형(예: 피보나치 수열, 배낭 문제, 최소 경로 등)을 해결하는 코드를 작성합니다.
-            3. 작성한 함수는 다음을 포함해야 합니다:
-            - 함수 이름과 매개변수는 문제에 따라 유동적으로 설정합니다.
-            - 동적 계획법의 `메모이제이션` 또는 `타뷸레이션` 접근법 중 하나를 사용합니다.
-            4. 주요 단계와 DP 테이블 구조를 설명하는 주석을 포함합니다.
+            1. The Dynamic Programming algorithm must be written in Python.
+            2. The user is trying to solve a specific problem type (e.g., Fibonacci sequence, Knapsack Problem, Shortest Path Problem).
+            3. The written function must include:
+            - A function name and parameters that are flexibly set depending on the problem.
+            - Use one of the two approaches: `Memoization` or `Tabulation`.
+            4. Include comments explaining the key steps and the structure of the DP table.
 
-            추가적으로, 다음 사항을 고려하세요:
-            - 반복적(recurrence relation)인 풀이 과정을 명확히 구현합니다.
-            - 최적화된 시간 복잡도를 고려합니다.
-            - 기본 입력 데이터가 비어 있을 때의 예외 처리를 포함합니다.
+            Additionally, please consider the following:
+            - Clearly implement the recurrence relation process.
+            - Optimize the algorithm's time complexity.
+            - Include exception handling for cases where the input data is empty.
             """,
-    "최단 경로 알고리즘": """
-            당신은 알고리즘 구현 전문가입니다. 
-            사용자는 최단 경로 알고리즘을 구현하고자 합니다. 
-            다음 규칙을 따르세요:
+    "Shortest Path Algorithm": """
+            You are an expert in algorithm implementation.  
+            The user wants to implement a shortest path algorithm.  
+            Please follow these rules:
 
-            1. 최단 경로 알고리즘은 Python으로 작성합니다.
-            2. 구현하려는 알고리즘은 다익스트라, 플로이드-와샬, 또는 벨만-포드 알고리즘 중 하나입니다.
-            3. 구현할 함수는 다음과 같은 규칙을 따릅니다:
-            - 함수 이름은 `shortest_path`로 하고, 입력 그래프와 시작 노드를 매개변수로 받습니다.
-            - 그래프는 인접 리스트 또는 가중치 행렬로 표현됩니다.
-            - 각 노드에 대한 최단 거리 값을 반환합니다.
-            4. 주요 단계에 대한 주석을 포함합니다.
+            1. The shortest path algorithm must be written in Python.
+            2. The algorithm to be implemented is one of the following: Dijkstra, Floyd-Warshall, or Bellman-Ford.
+            3. The written function must follow these rules:
+            - The function name should be `shortest_path` and should take the input graph and starting node as parameters.
+            - The graph should be represented as an adjacency list or a weighted matrix.
+            - The function should return the shortest distance values for each node.
+            4. Include comments explaining the key steps.
 
-            추가적으로, 다음 사항을 고려하세요:
-            - 그래프가 비어 있을 경우, 적절한 예외 처리를 수행합니다.
-            - 구현한 알고리즘의 시간 복잡도를 최적화합니다.
+            Additionally, please consider the following:
+            - Perform appropriate exception handling when the graph is empty.
+            - Optimize the implemented algorithm for time complexity.
             """
 }
 
@@ -122,7 +122,13 @@ def render_main_page():
     # 안내문구 표시 (처음 한 번만)
     if not st.session_state.greetings:
         with st.chat_message("assistant"):
-            intro = "안녕하세요! 알고리즘 대화 인터페이스에 오신 것을 환영합니다. 아래 버튼을 눌러 원하는 알고리즘의 시스템 프롬프트를 선택하세요!"
+            intro = """
+            Welcome to Prompt Explainer! 🤵🏻‍♀️\n
+            This tool is designed to help you leverage LLMs (Large Language Models) more effectively when solving algorithm problems. ⛳️\n
+            By visually highlighting which parts of the prompt the LLM focuses on, you can craft better prompts and receive higher-quality response codes. 🎲\n
+            When you input a prompt, we will visualize the emphasized sections based on SHAP values. This allows you to learn better prompt-writing strategies and maximize the utility of LLMs in your workflow. 🎞️\n 
+            Give it a try and enhance your experience in solving algorithmic problems! 🎸
+            """
             st.markdown(intro)
             st.session_state.messages.append({"role": "assistant", "content": intro})  # 대화 기록에 추가
         st.session_state.greetings = True  # 상태 업데이트
@@ -162,24 +168,46 @@ def render_main_page():
                 st.session_state.system_prompt = None
 
         # "다시 선택" 버튼을 눌러 선택을 초기화하는 기능
-        if st.button("다시 선택"):
+        if st.button("back"):
             st.session_state.button_pressed = None  # 상태 초기화
             st.session_state.system_prompt = None
             st.rerun()  # 리프레시하여 다시 처음 상태로 돌아가기
     
     # 프롬프트 입력 창 (st.chat_input() 사용)
-    user_input = st.chat_input("프롬프트를 입력하세요!")
+    user_input = st.chat_input("Enter your prompt!")
     if user_input:  # 사용자가 입력을 하면
         if user_input.strip():
             # LLM 응답 생성
-            response = get_huggingface_response(st.session_state["model"], user_input)
-            
+            # response = get_huggingface_response(st.session_state["model"], user_input)
+            # JSON 파일에서 SHAP 값 로드
+            def load_shap_values(json_file):
+                with open(json_file, 'r') as file:
+                    data = json.load(file)
+                return data['tokens'], data['shap_values']
+
+            # JSON 파일 경로
+            json_file_path = "shap_values.json"  # 파일 경로를 입력하세요
+            tokens, shap_values = load_shap_values(json_file_path)
+
+            # prompt 기여도 계산
+            token_html = ""
+            for token, shap_value in zip(tokens, shap_values):
+                intensity = min(max(shap_value, 0), 1)  # SHAP 값을 0~1 범위로 정규화
+                color = f"rgba(255, 0, 0, {intensity})"  # 빨간색 계열로 SHAP 값 표시
+                token_html += f'<span style="background-color: {color}; padding: 2px; margin: 1px; border-radius: 4px;">{token}</span> '
+
+            # 사용자 입력 시각화
+            st.markdown(f"**User Input:**")
+            st.markdown(token_html, unsafe_allow_html=True)
+
+            # 모델 응답 출력
+            # st.markdown(f"**LLM Response:**")
+            # st.markdown(f"<div style='background-color: #f0f0f0; padding: 10px; border-radius: 8px;'>{response}</div>", unsafe_allow_html=True)
+
             # 메시지 기록 추가
             st.session_state.messages.append({"role": "user", "content": user_input})
             st.session_state.messages.append({"role": "assistant", "content": response})
 
-            # prompt 기여도 계산
-            
             # 기여도 시각화
 
             # 대화 기록 저장
@@ -192,7 +220,7 @@ def render_main_page():
             else:
                 chat_history.append({"messages": st.session_state["messages"]})
 
-            save_chat_history(chat_history)
+            # save_chat_history(chat_history)
 
             # UI 업데이트
             st.rerun()
